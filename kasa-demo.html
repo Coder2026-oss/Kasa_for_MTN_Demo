@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kasa — Speak your language. Bank on your own.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #15120E;
+    --surface: #1E1912;
+    --surface-2: #26201A;
+    --line: #3A3128;
+    --gold: #D9A441;
+    --ochre: #B9682B;
+    --text: #F1E9DA;
+    --text-dim: #A79A87;
+    --green: #7A9B6E;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #F6F1E6;
+      --surface: #FFFFFF;
+      --surface-2: #EFE7D6;
+      --line: #DCD0B8;
+      --text: #241D14;
+      --text-dim: #6B6152;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F6F1E6;
+    --surface: #FFFFFF;
+    --surface-2: #EFE7D6;
+    --line: #DCD0B8;
+    --text: #241D14;
+    --text-dim: #6B6152;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  header.hero { padding: 64px 0 40px; }
+  .kicker { color: var(--gold); font-size: 15px; margin: 0 0 14px; font-weight: 500; }
+  h1.display {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(38px, 7vw, 60px);
+    line-height: 1.05;
+    margin: 0 0 20px;
+    max-width: 11ch;
+  }
+  p.lede { font-size: 18px; color: var(--text-dim); max-width: 52ch; margin: 0 0 28px; }
+  .code-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .dialcode {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 10px 20px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .keypad-hint { color: var(--text-dim); font-size: 14px; }
+  section { padding: 40px 0; border-top: 1px solid var(--line); }
+  h2.section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0 0 8px;
+  }
+  p.section-sub { color: var(--text-dim); margin: 0 0 28px; max-width: 56ch; }
+
+  /* Voice call widget — no transcript, no captions, just a listening/speaking orb */
+  .callpad { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 20px 0 6px; }
+  .orb {
+    width: 132px; height: 132px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--gold), var(--ochre) 70%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 0 rgba(217,164,65,0.5);
+    animation: breathe 3.2s ease-in-out infinite;
+    transition: background 0.4s ease;
+  }
+  .orb-core { width: 40%; height: 40%; border-radius: 50%; background: rgba(255,255,255,0.35); }
+  .orb.speaking { animation: pulse-speak 0.9s ease-in-out infinite; background: radial-gradient(circle at 35% 30%, var(--gold), var(--ochre) 70%); }
+  .orb.listening { animation: pulse-listen 1.4s ease-in-out infinite; background: radial-gradient(circle at 35% 30%, var(--green), #4E6B47 75%); }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217,164,65,0.35); }
+    50% { transform: scale(1.04); box-shadow: 0 0 0 14px rgba(217,164,65,0); }
+  }
+  @keyframes pulse-speak {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217,164,65,0.55); }
+    50% { transform: scale(1.09); box-shadow: 0 0 0 18px rgba(217,164,65,0); }
+  }
+  @keyframes pulse-listen {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(122,155,110,0.55); }
+    50% { transform: scale(1.07); box-shadow: 0 0 0 16px rgba(122,155,110,0); }
+  }
+  button.primary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  button.primary {
+    background: var(--gold);
+    color: #1E1912;
+    border: none;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  button.primary.ending { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); }
+  .compat-note { color: var(--text-dim); font-size: 12.5px; margin: 0; text-align: center; max-width: 40ch; }
+
+  /* Architecture */
+  .arch {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .arch-layer {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .arch-layer .name { font-weight: 600; font-size: 15px; }
+  .arch-layer .desc { color: var(--text-dim); font-size: 13.5px; text-align: right; }
+  .arch-arrow { text-align: center; color: var(--gold); font-size: 16px; padding: 4px 0; }
+
+  /* Scope */
+  .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .scope-col h3 { font-size: 14px; color: var(--gold); margin: 0 0 10px; font-weight: 600; }
+  .scope-col ul { margin: 0; padding-left: 18px; color: var(--text-dim); font-size: 14.5px; }
+  .scope-col li { margin-bottom: 6px; }
+
+  /* Roadmap */
+  .phase { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .phase:last-child { border-bottom: none; }
+  .phase .num { font-family: 'Fraunces', serif; font-size: 22px; color: var(--gold); width: 30px; flex-shrink: 0; }
+  .phase .body b { display: block; margin-bottom: 2px; }
+  .phase .body span { color: var(--text-dim); font-size: 14.5px; }
+
+  footer { padding: 40px 0 60px; color: var(--text-dim); font-size: 13px; text-align: center; }
+
+  @media (max-width: 560px) {
+    .scope-grid { grid-template-columns: 1fr; }
+    .arch-layer { flex-direction: column; align-items: flex-start; }
+    .arch-layer .desc { text-align: left; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">Voice-driven mobile money</p>
+    <h1 class="display">Speak your language. Bank on your own.</h1>
+    <p class="lede">Kasa turns a normal phone call into a full MoMo session — check balance, send money, buy airtime, hear a statement — in Twi, Ewe, Ga or Dagbani. No app, no menu, no English required.</p>
+    <div class="code-row">
+      <div class="dialcode">*527#</div>
+      <div class="keypad-hint">5-2-7 spells K‑A‑S on the keypad</div>
+    </div>
+  </header>
+
+  <section id="demo">
+    <h2 class="section-title">Try the call</h2>
+    <p class="section-sub">Tap start, then just talk. Kasa listens and answers out loud, in whichever language you choose — nothing here is typed or read on screen.</p>
+
+    <div class="callpad">
+      <div class="orb" id="orb" aria-hidden="true"><div class="orb-core"></div></div>
+      <button class="primary" id="callBtn">Start call</button>
+      <p class="compat-note">Needs a mic and a browser with speech support, like Chrome — and your sound on.</p>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <h2 class="section-title">How a call moves through the system</h2>
+    <p class="section-sub">Four layers, one existing rail underneath: MTN's MoMo platform.</p>
+    <div class="arch">
+      <div class="arch-layer"><span class="name">Telephony</span><span class="desc">Answers the call, streams audio both ways</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer"><span class="name">Language &amp; AI Layer</span><span class="desc">Speech → intent → speech, per language</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer"><span class="name">Application Backend</span><span class="desc">Holds context, enforces confirm‑before‑acting</span></div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer"><span class="name">MoMo Platform</span><span class="desc">Executes the transfer, top‑up, or balance pull</span></div>
+    </div>
+  </section>
+
+  <section id="scope">
+    <h2 class="section-title">What launches, what waits</h2>
+    <div class="scope-grid">
+      <div class="scope-col">
+        <h3>In scope</h3>
+        <ul>
+          <li>Balance, send money, airtime, mini statement</li>
+          <li>Twi, Ewe, Ga, Dagbani</li>
+          <li>Mandatory spoken confirmation before any transfer</li>
+          <li>Re-prompt flow when speech isn't understood</li>
+          <li>Monitoring console for live oversight</li>
+        </ul>
+      </div>
+      <div class="scope-col">
+        <h3>Not yet</h3>
+        <ul>
+          <li>Loans, credit, or savings products</li>
+          <li>Any screen-based interface</li>
+          <li>Merchant or business accounts</li>
+          <li>Cross-border transfers</li>
+          <li>Execution without a spoken "yes"</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <h2 class="section-title">Rollout</h2>
+    <div class="phase">
+      <div class="num">1</div>
+      <div class="body"><b>Core flow in Twi</b><span>All four actions live, monitoring console running</span></div>
+    </div>
+    <div class="phase">
+      <div class="num">2</div>
+      <div class="body"><b>Full language rollout</b><span>Ewe, Ga, Dagbani added; conversation design refined from real usage</span></div>
+    </div>
+    <div class="phase">
+      <div class="num">3</div>
+      <div class="body"><b>Hausa and beyond</b><span>New language, expanded actions, deeper MoMo integration</span></div>
+    </div>
+  </section>
+
+  <footer>Kasa sits on top of MTN's existing MoMo rails as a new access channel, alongside USSD and the app.</footer>
+</div>
+
+<script>
+(function(){
+  const orb = document.getElementById('orb');
+  const callBtn = document.getElementById('callBtn');
+
+  const canSpeak = 'speechSynthesis' in window;
+  const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const canListen = !!RecognitionCtor;
+
+  let voiceList = [];
+  if (canSpeak) {
+    const loadVoices = () => { try { voiceList = window.speechSynthesis.getVoices() || []; } catch (e) {} };
+    loadVoices();
+    try { window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) {}
+  }
+
+  function setOrb(state){
+    orb.classList.remove('speaking', 'listening');
+    if (state === 'speaking') orb.classList.add('speaking');
+    if (state === 'listening') orb.classList.add('listening');
+  }
+
+  // Speak a line aloud. Resolves once speech finishes (or immediately if unsupported).
+  function speak(text){
+    return new Promise(resolve => {
+      if (!canSpeak) { resolve(); return; }
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
+        const en = voiceList.find(v => /en/i.test(v.lang));
+        if (en) u.voice = en;
+        u.onend = resolve;
+        u.onerror = resolve;
+        window.speechSynthesis.speak(u);
+      } catch (e) { resolve(); }
+    });
+  }
+
+  // Listen for one spoken utterance, retrying quietly for up to `timeoutMs` total.
+  // Resolves { text, timedOut, blocked }. timedOut = true genuine silence (hang up).
+  // blocked = true means the mic itself isn't available (permission denied / no device).
+  function listen(timeoutMs){
+    return new Promise(resolve => {
+      if (!canListen) { resolve({ text: '', blocked: true }); return; }
+      const start = Date.now();
+      let finished = false;
+      const finish = (result) => { if (!finished) { finished = true; resolve(result); } };
+      function attempt(){
+        if (finished) return;
+        const remaining = timeoutMs - (Date.now() - start);
+        if (remaining <= 0) { finish({ text: '', timedOut: true }); return; }
+        let rec;
+        try { rec = new RecognitionCtor(); } catch (e) { finish({ text: '', blocked: true }); return; }
+        rec.lang = 'en-US';
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        let settled = false;
+        const localTimer = setTimeout(() => { if (!settled) { settled = true; try { rec.stop(); } catch (e) {} } }, remaining);
+        rec.onresult = (e) => {
+          if (settled) return; settled = true; clearTimeout(localTimer);
+          finish({ text: (e.results[0][0].transcript || '').toLowerCase(), timedOut: false });
+        };
+        rec.onerror = (e) => {
+          if (settled) return; settled = true; clearTimeout(localTimer);
+          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { finish({ text: '', blocked: true }); return; }
+          attempt(); // e.g. 'no-speech' from the browser's own short internal timeout — keep waiting until our 30s is up
+        };
+        rec.onend = () => {
+          if (settled) return; settled = true; clearTimeout(localTimer);
+          attempt();
+        };
+        try { rec.start(); } catch (e) { finish({ text: '', blocked: true }); }
+      }
+      attempt();
+    });
+  }
+
+  async function say(text){ setOrb('speaking'); await speak(text); setOrb('idle'); }
+  async function hear(){ setOrb('listening'); const r = await listen(30000); setOrb('idle'); return r; }
+
+  // Multilingual welcome menu — the same "welcome, choose a language" prompt read out
+  // in English, then Ga, Ewe, Dagbani and Hausa, so a caller hears their own language.
+  const MENU = [
+    { id: 1, name: 'English',  line: 'Welcome to Kasa. Which language would you like to speak? Say one for English, two for Ga, three for Ewe, four for Dagbani, or five for Hausa.' },
+    { id: 2, name: 'Ga',       line: 'Oobake. Ga. Say two.' },
+    { id: 3, name: 'Ewe',      line: 'Woezor. Ewe. Say three.' },
+    { id: 4, name: 'Dagbani',  line: 'Naa paabu na. Dagbani. Say four.' },
+    { id: 5, name: 'Hausa',    line: 'Barka da zuwa. Hausa. Say five.' }
+  ];
+
+  const ACTIONS = {
+    balance:   { needsConfirm: false, resultLine: 'Your balance is GH₵240.' },
+    send:      { needsConfirm: true,  confirmLine: 'Sending GH₵50 to Kwame Mensah. Say yes to confirm.', successLine: 'Done. GH₵50 sent to Kwame Mensah.' },
+    airtime:   { needsConfirm: true,  confirmLine: 'Buying GH₵10 of airtime for this line. Say yes to confirm.', successLine: 'Done. GH₵10 of airtime added.' },
+    statement: { needsConfirm: false, resultLine: 'This week: two transfers out, one airtime top-up, one deposit in. Net down GH₵30.' }
+  };
+
+  function matchLanguage(t){
+    if (/\b(one|1|english)\b/.test(t)) return MENU[0];
+    if (/\b(two|2|ga)\b/.test(t)) return MENU[1];
+    if (/\b(three|3|ewe)\b/.test(t)) return MENU[2];
+    if (/\b(four|4|dagbani)\b/.test(t)) return MENU[3];
+    if (/\b(five|5|hausa)\b/.test(t)) return MENU[4];
+    return null;
+  }
+  function matchAction(t){
+    if (/balance/.test(t)) return { key: 'balance', ...ACTIONS.balance };
+    if (/send|transfer/.test(t)) return { key: 'send', ...ACTIONS.send };
+    if (/airtime|top.?up|credit/.test(t)) return { key: 'airtime', ...ACTIONS.airtime };
+    if (/statement|spend|spent/.test(t)) return { key: 'statement', ...ACTIONS.statement };
+    return null;
+  }
+  const isYes = t => /\byes\b|yeah|yep|confirm|okay|\bok\b/.test(t);
+  const isNo = t => /\bno\b|cancel|don'?t/.test(t);
+  const isEnd = t => /\bno\b|nothing else|that'?s all|goodbye|bye|end call|hang up/.test(t);
+
+  let gen = 0; // bumped on manual end, so in-flight steps stop quietly
+
+  async function runCall(myGen){
+    for (const m of MENU) {
+      if (gen !== myGen) return;
+      await say(m.line);
+    }
+    let lang = null;
+    while (!lang && gen === myGen) {
+      const r = await hear();
+      if (gen !== myGen) return;
+      if (r.blocked) { await say('I can\'t reach the microphone, so I can\'t hear you on this call. Please allow microphone access and start again.'); endCall(); return; }
+      if (r.timedOut) { await say('No response received. Goodbye.'); endCall(); return; }
+      lang = matchLanguage(r.text);
+      if (!lang && gen === myGen) await say('Sorry, I did not catch that. Please say a number from one to five.');
+    }
+    if (gen !== myGen) return;
+
+    await say(`Continuing in ${lang.name}. What would you like to do? You can check your balance, send money, buy airtime, or hear your mini statement.`);
+
+    while (gen === myGen) {
+      const r = await hear();
+      if (gen !== myGen) return;
+      if (r.blocked) { await say('I can\'t reach the microphone anymore, so I have to end this call.'); endCall(); return; }
+      if (r.timedOut) { await say('No response received. Goodbye.'); endCall(); return; }
+      const t = r.text;
+      if (isEnd(t)) { await say('Thank you for using Kasa. Goodbye.'); endCall(); return; }
+
+      const action = matchAction(t);
+      if (!action) {
+        await say('Sorry, I did not catch that. You can say balance, send money, airtime, or statement — or say no to end the call.');
+        continue;
+      }
+      if (gen !== myGen) return;
+
+      if (action.needsConfirm) {
+        await say(action.confirmLine);
+        if (gen !== myGen) return;
+        const c = await hear();
+        if (gen !== myGen) return;
+        if (c.blocked) { await say('I can\'t reach the microphone anymore, so I have cancelled that for safety and I have to end this call.'); endCall(); return; }
+        if (c.timedOut) { await say('No response received, so I have cancelled that for safety. Goodbye.'); endCall(); return; }
+        if (isYes(c.text)) await say(action.successLine);
+        else if (isNo(c.text)) await say('Okay, cancelled.');
+        else await say('I did not hear a clear yes, so I have cancelled that for safety.');
+      } else {
+        await say(action.resultLine);
+      }
+      if (gen !== myGen) return;
+      await say('Anything else?');
+    }
+  }
+
+  function endCall(){
+    gen++;
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    setOrb('idle');
+    callBtn.textContent = 'Start call';
+    callBtn.classList.remove('ending');
+    callBtn.onclick = startCall;
+  }
+
+  function startCall(){
+    const myGen = ++gen;
+    callBtn.textContent = 'End call';
+    callBtn.classList.add('ending');
+    callBtn.onclick = endCall;
+    if (!canListen) {
+      say('Voice input is not supported in this browser. Please try Chrome on desktop or Android.').then(() => endCall());
+      return;
+    }
+    runCall(myGen);
+  }
+
+  callBtn.onclick = startCall;
+})();
+</script>
+</body>
+</html>
